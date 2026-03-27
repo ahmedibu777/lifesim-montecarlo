@@ -33,24 +33,41 @@ btn.addEventListener('click', async () => {
       throw new Error(`Server error: ${response.status}`);
     }
 
-    const data = await response.json();
-    const sim  = data.simulation;
+    const data  = await response.json();
+    const sim   = data.simulation;
     const story = data.narrative;
 
     resultDiv.innerHTML = `
       <h2>Simulation Results</h2>
       <div class="result-numbers">
-        <p><strong>${decisionA}</strong> → Score: ${sim.decision_a_score}</p>
-        <p><strong>${decisionB}</strong> → Score: ${sim.decision_b_score}</p>
-        <p><strong>Recommended:</strong> ${sim.recommended}</p>
+        <p>
+          <strong>${decisionA}</strong> &rarr;
+          Avg Final Income: <strong>$${sim.decision_a.avg_final_income.toLocaleString(undefined, {maximumFractionDigits: 0})}</strong> |
+          Volatility: $${sim.decision_a.final_income_std.toLocaleString(undefined, {maximumFractionDigits: 0})} |
+          Avg Satisfaction: <strong>${sim.decision_a.avg_satisfaction.toFixed(2)}</strong>
+        </p>
+        <p>
+          <strong>${decisionB}</strong> &rarr;
+          Avg Final Income: <strong>$${sim.decision_b.avg_final_income.toLocaleString(undefined, {maximumFractionDigits: 0})}</strong> |
+          Volatility: $${sim.decision_b.final_income_std.toLocaleString(undefined, {maximumFractionDigits: 0})} |
+          Avg Satisfaction: <strong>${sim.decision_b.avg_satisfaction.toFixed(2)}</strong>
+        </p>
       </div>
-
-      <h3>Future Narrative</h3>
+      <h3>Your Story (by Hugging Face Nemotron)</h3>
       <pre>${story}</pre>
     `;
+
   } catch (err) {
-    resultDiv.innerHTML = `<p class="error">Error: ${err.message}</p>`;
+    console.error(err);
+    resultDiv.innerHTML = `
+      <p class="error">
+        Something went wrong: ${err.message}<br><br>
+        Make sure the backend is running on
+        de>http://localhost:8000</code>
+      </p>
+    `;
   } finally {
+    // Always re-enable the button
     btn.disabled = false;
     btn.textContent = 'Simulate My Future';
   }
