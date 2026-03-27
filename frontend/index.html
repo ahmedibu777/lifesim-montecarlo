@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LifeSim – Monte Carlo Life Decision Simulator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>LifeSim</h1>
+  <p class="subtitle">Monte Carlo Life Decision Simulator</p>
+
+  <div class="card">
+    <label>Decision A (e.g. "Do a Master's Degree")
+      <input type="text" id="decisionA"
+             value="Do a Master's Degree">
+    </label>
+
+    <label>Decision B (e.g. "Take Job Offer")
+      <input type="text" id="decisionB"
+             value="Take Job Offer">
+    </label>
+
+    <label>Risk Tolerance
+      <select id="risk">
+        <option value="low">Low – I prefer stability</option>
+        <option value="medium" selected>Medium – balanced</option>
+        <option value="high">High – I want maximum growth</option>
+      </select>
+    </label>
+
+    <button id="runBtn">Simulate My Future</button>
+  </div>
+
+  <div id="result" class="card hidden"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
