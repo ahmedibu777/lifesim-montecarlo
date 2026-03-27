@@ -1,27 +1,40 @@
 # backend/narrative.py
+import logging
 import os
-from huggingface_hub import InferenceClient
+
 from dotenv import load_dotenv
+from huggingface_hub import InferenceClient
 
 load_dotenv()
 
-HF_API_TOKEN = os.getenv("HF_API_TOKEN")
-if not HF_API_TOKEN:
-    raise RuntimeError(
-        "HF_API_TOKEN not set. "
-        "Create a backend/.env file with your token."
-    )
-
-# Free NVIDIA Nemotron model on Hugging Face
-MODEL_ID = "nvidia/Nemotron-3-8B-Instruct"
-
-client = InferenceClient(
-    model=MODEL_ID,
-    token=HF_API_TOKEN,
+# Hugging Face router endpoint (replaces the deprecated api-inference.huggingface.co)
+_MODEL_URL = (
+    "https://router.huggingface.co/hf-inference/models/nvidia/Nemotron-3-8B-Instruct"
 )
+
+logger = logging.getLogger(__name__)
+
+_client: InferenceClient | None = None
+
+
+def _get_client() -> InferenceClient:
+    """Return a cached HF client; raises a clear error if token is missing."""
+    global _client
+    if _client is not None:
+        return _client
+    token = os.getenv("HF_API_TOKEN")
+    if not token:
+        raise RuntimeError(
+            "HF_API_TOKEN is not set. "
+            "Create a backend/.env file or export the variable before starting the server."
+        )
+    _client = InferenceClient(model=_MODEL_URL, token=token)
+    return _client
 
 
 def generate_narrative(req, summary: dict) -> str:
+    client = _get_client()
+
     prompt = f"""
 You are an encouraging life-coach AI. The user is deciding between two paths:
 
