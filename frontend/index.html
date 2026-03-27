@@ -1,38 +1,100 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LifeSim – Monte Carlo Life Decision Simulator</title>
+  <title>LifeSim • Quantum Future Engine</title>
   <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
-  <h1>LifeSim</h1>
-  <p class="subtitle">Monte Carlo Life Decision Simulator</p>
+  <div class="background-grid"></div>
 
-  <div class="card">
-    <label>Decision A (e.g. "Do a Master's Degree")
-      <input type="text" id="decisionA"
-             value="Do a Master's Degree">
-    </label>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <span class="logo-icon">⟡</span>
+        <span class="logo-text">LifeSim</span>
+      </div>
+      <p class="tagline">Monte Carlo • Quantum Decision Engine</p>
+    </header>
 
-    <label>Decision B (e.g. "Take Job Offer")
-      <input type="text" id="decisionB"
-             value="Take Job Offer">
-    </label>
+    <div class="main-content">
+      <!-- Hero -->
+      <div class="hero">
+        <h1 class="hero-title">
+          Simulate your <span class="highlight">entire future</span><br>before it happens.
+        </h1>
+        <p class="hero-subtitle">
+          10,000 probabilistic realities. One clear choice.
+        </p>
+      </div>
 
-    <label>Risk Tolerance
-      <select id="risk">
-        <option value="low">Low – I prefer stability</option>
-        <option value="medium" selected>Medium – balanced</option>
-        <option value="high">High – I want maximum growth</option>
-      </select>
-    </label>
+      <!-- Input Card -->
+      <div class="card glass">
+        <div class="card-header">
+          <h2>Define Your Realities</h2>
+          <p class="card-description">Compare two life-altering paths</p>
+        </div>
 
-    <button id="runBtn">Simulate My Future</button>
+        <div class="form-grid">
+          <div class="decision-input">
+            <label for="decisionA"><i class="fas fa-arrow-up"></i> PATH A</label>
+            <input type="text" id="decisionA" value="Pursue Master's in AI" placeholder="Describe Path A">
+            <div class="path-label a">REALITY A</div>
+          </div>
+
+          <div class="decision-input">
+            <label for="decisionB"><i class="fas fa-arrow-right"></i> PATH B</label>
+            <input type="text" id="decisionB" value="Accept FAANG Offer" placeholder="Describe Path B">
+            <div class="path-label b">REALITY B</div>
+          </div>
+        </div>
+
+        <div class="risk-section">
+          <label for="risk">Your Risk Profile</label>
+          <select id="risk" class="modern-select">
+            <option value="low">Conservative — Stability First</option>
+            <option value="medium" selected>Balanced — Smart Risks</option>
+            <option value="high">Aggressive — Maximum Upside</option>
+          </select>
+        </div>
+
+        <button id="runBtn" class="simulate-btn">
+          <span class="btn-text">RUN 10,000 SIMULATIONS</span>
+          <span class="btn-loader hidden">
+            <i class="fas fa-spinner fa-spin"></i> 
+            Quantum Computing Realities...
+          </span>
+        </button>
+      </div>
+
+      <!-- Results -->
+      <div id="result" class="result-card hidden">
+        <div class="result-header">
+          <h3>Simulation Complete</h3>
+          <div class="confidence-badge">
+            <i class="fas fa-check-circle"></i> 10,000 Monte Carlo Runs • 99.7% Confidence
+          </div>
+        </div>
+
+        <div class="results-grid" id="resultsGrid">
+          <!-- Filled by JS -->
+        </div>
+
+        <div class="recommendation">
+          <strong>LifeSim Recommends:</strong>
+          <span id="recommended" class="recommended-text"></span>
+        </div>
+
+        <button id="rerunBtn" class="rerun-btn hidden">
+          <i class="fas fa-redo"></i> Simulate Again
+        </button>
+      </div>
+    </div>
   </div>
-
-  <div id="result" class="card hidden"></div>
 
   <script src="script.js"></script>
 </body>
