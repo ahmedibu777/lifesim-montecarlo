@@ -18,8 +18,8 @@ class LLMConfig:
     hf_token: Optional[str]
     together_api_key: Optional[str]
 
-    nvidia_model: str = "nvidia/nemotron-4-340b-instruct"
-    groq_model: str = "llama-3.1-70b-versatile"
+    nvidia_model: str = "meta/llama-3.1-70b-instruct"
+    groq_model: str = "llama-3.3-70b-versatile"
     hf_model: str = "nvidia/Nemotron-3-8B-Instruct"
     together_model: str = "meta-llama/Meta-Llama-3.1-70B-Instruct"
 
