@@ -48,25 +48,32 @@
   let narrativeTimeoutId = null;
 
   // ===== SECTION NAVIGATION =====
+  const showSection = (targetId) => {
+    document.querySelectorAll(".section").forEach((s) => {
+      if (s.id === targetId) {
+        s.classList.remove("hidden");
+        s.classList.add("active-section");
+      } else {
+        s.classList.add("hidden");
+        s.classList.remove("active-section");
+      }
+    });
+  };
+
   const initNavigation = () => {
     const navLinks = document.querySelectorAll(".nav-link");
-    const sections = document.querySelectorAll(".section");
 
     navLinks.forEach((link) => {
       link.addEventListener("click", (e) => {
         e.preventDefault();
 
-        // Remove active class from all links and sections
         navLinks.forEach((l) => l.classList.remove("active"));
-        sections.forEach((s) => s.classList.remove("active-section"));
-
-        // Add active class to clicked link and corresponding section
         link.classList.add("active");
+
         const sectionId = link.getAttribute("data-section");
-        const section = document.getElementById(sectionId);
-        if (section) {
-          section.classList.add("active-section");
-        }
+        // "scenarios" is a subsection inside results, not its own section
+        const targetId = sectionId === "scenarios" ? "results" : sectionId;
+        showSection(targetId);
       });
     });
   };
@@ -252,10 +259,7 @@
       renderResults(data);
 
       // Show results section
-      document.querySelectorAll(".section").forEach((s) =>
-        s.classList.remove("active-section")
-      );
-      document.getElementById("results").classList.add("active-section");
+      showSection("results");
 
       // Update nav
       document.querySelectorAll(".nav-link").forEach((l) =>
@@ -572,10 +576,7 @@
   const initSimulateAgain = () => {
     if (!els.simulateAgainBtn) return;
     els.simulateAgainBtn.addEventListener("click", () => {
-      document.querySelectorAll(".section").forEach((s) =>
-        s.classList.remove("active-section")
-      );
-      document.getElementById("simulate").classList.add("active-section");
+      showSection("simulate");
 
       document.querySelectorAll(".nav-link").forEach((l) =>
         l.classList.remove("active")
