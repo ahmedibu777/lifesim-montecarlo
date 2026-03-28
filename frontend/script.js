@@ -205,10 +205,10 @@
       decision_b: els.decisionB?.value?.trim() || "",
       description_a: els.descA?.value?.trim() || "",
       description_b: els.descB?.value?.trim() || "",
-      risk: els.riskTolerance?.value || "medium",
+      risk_tolerance: els.riskTolerance?.value || "medium",
       years: Number(els.yearsInput?.value) || 10,
       runs: Number(els.runsInput?.value) || 500,
-      narrative_mode: els.narrativeMode?.value || "ai",
+      narrative_mode: els.narrativeMode?.value || "with_narrative",
     };
   };
 
@@ -477,6 +477,7 @@
 
   // ===== INIT =====
   const init = () => {
+    console.log("Initializing app...");
     initNavigation();
     initCharCounters();
     initPresets();
@@ -484,6 +485,7 @@
     initExportCsv();
     initCopyLink();
     initSimulateAgain();
+    console.log("App ready!");
   };
 
   if (document.readyState === "loading") {
