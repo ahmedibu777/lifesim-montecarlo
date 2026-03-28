@@ -1,99 +1,314 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LifeSim • Quantum Future Engine</title>
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>lifesim / decision-engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="background-grid"></div>
 
-  <div class="container">
-    <!-- Header -->
-    <header class="header">
-      <div class="logo">
-        <span class="logo-icon">⟡</span>
+  <!-- Ambient background orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- Toast notification -->
+  <div id="toast" class="hidden toast"></div>
+
+  <!-- Layout wrapper -->
+  <div class="layout">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-icon">⬡</span>
         <span class="logo-text">LifeSim</span>
       </div>
-      <p class="tagline">Monte Carlo • Quantum Decision Engine</p>
-    </header>
 
-    <div class="main-content">
-      <!-- Hero -->
-      <div class="hero">
-        <h1 class="hero-title">
-          Simulate your <span class="highlight">entire future</span><br>before it happens.
-        </h1>
-        <p class="hero-subtitle">
-          10,000 probabilistic realities. One clear choice.
-        </p>
+      <nav class="sidebar-nav">
+        <span class="nav-label">NAVIGATION</span>
+        <a href="#simulate" class="nav-link active" data-section="simulate">
+          <span class="nav-icon">◈</span>
+          Simulate
+        </a>
+        <a href="#results" class="nav-link" data-section="results">
+          <span class="nav-icon">◉</span>
+          Results
+        </a>
+        <a href="#scenarios" class="nav-link" data-section="scenarios">
+          <span class="nav-icon">◎</span>
+          Scenarios
+        </a>
+        <a href="#ai-story" class="nav-link" data-section="ai-story">
+          <span class="nav-icon">◍</span>
+          AI Story
+        </a>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="sidebar-stats">
+        <span class="nav-label">SESSION</span>
+        <div class="stat-row">
+          <span class="stat-key">runs</span>
+          <span class="stat-val" id="sessionRuns">0</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-key">last sim</span>
+          <span class="stat-val" id="sessionLast">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-key">model</span>
+          <span class="stat-val">mc-v2</span>
+        </div>
       </div>
 
-      <!-- Input Card -->
-      <div class="card glass">
-        <div class="card-header">
-          <h2>Define Your Realities</h2>
-          <p class="card-description">Compare two life-altering paths</p>
-        </div>
-
-        <div class="form-grid">
-          <div class="decision-input">
-            <label for="decisionA"><i class="fas fa-arrow-up"></i> PATH A</label>
-            <input type="text" id="decisionA" value="Pursue Master's in AI" placeholder="Describe Path A">
-            <div class="path-label a">REALITY A</div>
-          </div>
-
-          <div class="decision-input">
-            <label for="decisionB"><i class="fas fa-arrow-right"></i> PATH B</label>
-            <input type="text" id="decisionB" value="Accept FAANG Offer" placeholder="Describe Path B">
-            <div class="path-label b">REALITY B</div>
-          </div>
-        </div>
-
-        <div class="risk-section">
-          <label for="risk">Your Risk Profile</label>
-          <select id="risk" class="modern-select">
-            <option value="low">Conservative — Stability First</option>
-            <option value="medium" selected>Balanced — Smart Risks</option>
-            <option value="high">Aggressive — Maximum Upside</option>
-          </select>
-        </div>
-
-        <button id="runBtn" class="simulate-btn">
-          <span class="btn-text">RUN 10,000 SIMULATIONS</span>
-          <span class="btn-loader hidden">
-            <i class="fas fa-spinner fa-spin"></i> 
-            Quantum Computing Realities...
-          </span>
-        </button>
+      <div class="sidebar-footer">
+        <span class="footer-badge">BETA</span>
+        <span class="footer-txt">Monte Carlo Engine</span>
       </div>
+    </aside>
 
-      <!-- Results -->
-      <div id="result" class="result-card hidden">
-        <div class="result-header">
-          <h3>Simulation Complete</h3>
-          <div class="confidence-badge">
-            <i class="fas fa-check-circle"></i> 10,000 Monte Carlo Runs • 99.7% Confidence
+    <!-- MAIN CONTENT -->
+    <main class="main">
+
+      <!-- TOP BAR -->
+      <header class="topbar">
+        <div class="breadcrumb">
+          <span class="crumb-repo">lifesim</span>
+          <span class="crumb-sep">/</span>
+          <span class="crumb-page">decision-engine</span>
+          <span class="crumb-tag">main</span>
+        </div>
+
+        <div class="now-playing">
+          <span class="np-icon">▶</span>
+          <div class="marquee-wrap">
+            <div class="marquee-track">
+              <span>Running Monte Carlo Simulations &nbsp;·&nbsp; 500 Iterations &nbsp;·&nbsp; 10-Year Horizon &nbsp;·&nbsp; Probabilistic Life Modelling &nbsp;·&nbsp; Now Playing: Your Future &nbsp;·&nbsp; Running Monte Carlo Simulations &nbsp;·&nbsp; 500 Iterations &nbsp;·&nbsp; 10-Year Horizon &nbsp;·&nbsp; Probabilistic Life Modelling &nbsp;·&nbsp; Now Playing: Your Future &nbsp;·&nbsp;</span>
+            </div>
+          </div>
+          <span class="np-dot"></span>
+        </div>
+      </header>
+
+      <!-- SIMULATE SECTION -->
+      <section id="simulate" class="section active-section">
+
+        <div class="section-header">
+          <h1 class="section-title">Decision Engine <span class="title-accent">// Monte Carlo</span></h1>
+          <p class="section-sub">Model two life paths across time. Simulate uncertainty. Find your edge.</p>
+        </div>
+
+        <!-- Quick presets -->
+        <div class="preset-row">
+          <span class="preset-label">Quick Load:</span>
+          <button class="preset-btn" data-preset="startup">
+            <span>🚀</span> Startup vs Corporate
+          </button>
+          <button class="preset-btn" data-preset="gradschool">
+            <span>🎓</span> Grad School vs Work
+          </button>
+          <button class="preset-btn" data-preset="housing">
+            <span>🏠</span> Buy House vs Rent
+          </button>
+        </div>
+
+        <!-- Path cards -->
+        <div class="paths-container">
+          <!-- Path A -->
+          <div class="path-card path-a">
+            <div class="path-header">
+              <span class="path-badge badge-a">PATH A</span>
+              <div class="path-indicator ind-a"></div>
+            </div>
+            <input
+              type="text"
+              id="decisionA"
+              class="path-title-input"
+              placeholder="e.g. Join a Startup"
+              maxlength="60"
+            />
+            <textarea
+              id="descA"
+              class="path-desc"
+              placeholder="Describe this path… what excites you? What's the risk? What does success look like in 5 years?"
+              maxlength="300"
+            ></textarea>
+            <div class="char-counter"><span id="charA">0</span>/300</div>
+          </div>
+
+          <!-- VS Divider -->
+          <div class="vs-divider">
+            <div class="vs-line"></div>
+            <span class="vs-label">VS</span>
+            <div class="vs-line"></div>
+          </div>
+
+          <!-- Path B -->
+          <div class="path-card path-b">
+            <div class="path-header">
+              <span class="path-badge badge-b">PATH B</span>
+              <div class="path-indicator ind-b"></div>
+            </div>
+            <input
+              type="text"
+              id="decisionB"
+              class="path-title-input"
+              placeholder="e.g. Stay at Big Tech"
+              maxlength="60"
+            />
+            <textarea
+              id="descB"
+              class="path-desc"
+              placeholder="Describe this path… stability, growth, trade-offs, what you'd miss if you didn't take it."
+              maxlength="300"
+            ></textarea>
+            <div class="char-counter"><span id="charB">0</span>/300</div>
           </div>
         </div>
 
-        <div class="results-grid" id="resultsGrid">
-          <!-- Filled by JS -->
+        <!-- Sim parameters -->
+        <div class="params-row">
+          <div class="param-group">
+            <label class="param-label" for="riskTolerance">Risk Profile</label>
+            <select id="riskTolerance" class="param-select">
+              <option value="low">🛡️ Low — Conservative</option>
+              <option value="medium" selected>⚖️ Medium — Balanced</option>
+              <option value="high">🔥 High — Aggressive</option>
+            </select>
+          </div>
+
+          <div class="param-group">
+            <label class="param-label" for="yearsInput">Years</label>
+            <input type="number" id="yearsInput" class="param-input" value="10" min="1" max="30" />
+          </div>
+
+          <div class="param-group">
+            <label class="param-label" for="runsInput">Simulation Runs</label>
+            <input type="number" id="runsInput" class="param-input" value="500" min="100" max="2000" step="100" />
+          </div>
+
+          <div class="param-group">
+            <label class="param-label" for="narrativeMode">Narrative Mode</label>
+            <select id="narrativeMode" class="param-select">
+              <option value="ai">✨ AI Narrative</option>
+              <option value="none">— No Narrative</option>
+              <option value="compare">⚡ Compare Styles</option>
+            </select>
+          </div>
         </div>
 
-        <div class="recommendation">
-          <strong>LifeSim Recommends:</strong>
-          <span id="recommended" class="recommended-text"></span>
+        <!-- Run button -->
+        <div class="run-row">
+          <button id="runBtn" class="run-btn">
+            <span class="run-icon">▶</span>
+            <span class="run-text">RUN SIMULATION</span>
+            <span class="run-spinner hidden">⟳</span>
+          </button>
+          <span class="run-sub">500 Monte Carlo runs · 10-year horizon</span>
         </div>
 
-        <button id="rerunBtn" class="rerun-btn hidden">
-          <i class="fas fa-redo"></i> Simulate Again
-        </button>
-      </div>
-    </div>
+      </section>
+
+      <!-- RESULTS SECTION -->
+      <section id="results" class="section hidden">
+
+        <div class="section-header">
+          <h2 class="section-title">Simulation Results <span class="title-accent">// Analysis</span></h2>
+          <div class="result-actions">
+            <button class="action-btn" id="simulateAgainBtn">↩ Simulate Again</button>
+            <button class="action-btn" id="exportCsvBtn">⬇ Export CSV</button>
+            <button class="action-btn" id="copyLinkBtn">⎘ Copy Link</button>
+          </div>
+        </div>
+
+        <!-- Spotify-style track bar -->
+        <div class="track-bar">
+          <div class="track-label track-label-a">
+            <span class="track-dot dot-a"></span>
+            <span id="trackLabelA">Path A</span>
+          </div>
+          <div class="track-rail">
+            <div class="track-fill" id="trackFill"></div>
+            <div class="track-thumb" id="trackThumb"></div>
+          </div>
+          <div class="track-label track-label-b">
+            <span id="trackLabelB">Path B</span>
+            <span class="track-dot dot-b"></span>
+          </div>
+        </div>
+
+        <!-- Metric cards -->
+        <div id="resultsGrid" class="results-grid">
+          <!-- JS fills: metric cards go here -->
+        </div>
+
+        <!-- Probability bars -->
+        <div class="subsection">
+          <h3 class="subsection-title">⚡ Probability Distribution</h3>
+          <div id="probBars" class="prob-bars">
+            <!-- JS fills: animated prob bars go here -->
+          </div>
+        </div>
+
+        <!-- Histogram -->
+        <div class="subsection">
+          <h3 class="subsection-title">📊 Income Distribution <span class="dim">(final year)</span></h3>
+          <div id="distributionGrid" class="distribution-grid">
+            <!-- JS fills: histogram bars go here -->
+          </div>
+        </div>
+
+        <!-- Recommendation -->
+        <div class="subsection">
+          <h3 class="subsection-title">🎯 Recommendation</h3>
+          <div class="recommendation-box">
+            <p id="recommended" class="rec-text">Run a simulation to see your recommendation.</p>
+          </div>
+        </div>
+
+        <!-- Scenario stress tests -->
+        <div class="subsection" id="scenarios">
+          <h3 class="subsection-title">🧪 Scenario Stress Tests</h3>
+          <div id="scenarioGrid" class="scenario-grid">
+            <!-- JS fills: scenario cards go here -->
+          </div>
+        </div>
+
+      </section>
+
+      <!-- AI STORY SECTION -->
+      <section id="ai-story" class="section hidden">
+        <div class="section-header">
+          <h2 class="section-title">AI Story <span class="title-accent">// Narrative</span></h2>
+        </div>
+
+        <div class="narrative-card">
+          <div class="narrative-header">
+            <span class="nar-icon">◈</span>
+            <span class="nar-title">Life Coach Analysis</span>
+            <span class="nar-model">nvidia/Nemotron</span>
+          </div>
+          <p id="narrativeText" class="narrative-text">
+            Run a simulation with <strong>AI Narrative</strong> mode to generate your personalized life-path story.
+          </p>
+        </div>
+
+        <!-- Compare block (hidden until compare mode) -->
+        <div id="comparisonBlock" class="comparison-block hidden">
+          <h3 class="subsection-title">⚡ Model Comparison</h3>
+          <div class="comparison-grid">
+            <!-- JS fills: comparison model blocks go here -->
+          </div>
+        </div>
+      </section>
+
+    </main>
   </div>
 
   <script src="script.js"></script>
