@@ -290,13 +290,14 @@
   // ===== RESULT RENDERING =====
   const renderResults = (data) => {
     if (!data) return;
-    renderMetricCards(data);
-    renderProbabilityBars(data);
-    renderHistograms(data);
-    renderScenarios(data);
-    renderRecommendation(data);
-    renderTrackBar(data);
-    renderNarrative(data);
+    const sim = data.simulation; // Unwrap simulation object
+    renderMetricCards(sim);
+    renderProbabilityBars(sim);
+    renderHistograms(sim);
+    renderScenarios(sim);
+    renderRecommendation(sim);
+    renderTrackBar(sim);
+    renderNarrative(data); // Pass full data for narrative
   };
 
   const renderMetricCard = (label, stats) => {
@@ -344,64 +345,148 @@
     return card;
   };
 
-  const renderMetricCards = (data) => {
-    if (!els.resultsGrid) return;
+  const renderMetricCards = (sim) => {
+    if (!els.resultsGrid || !sim) return;
     clearElement(els.resultsGrid);
-    const { path_a, path_b } = data || {};
-    if (!path_a || !path_b) return;
+    const { base_paths } = sim;
+    if (!base_paths) return;
 
-    els.resultsGrid.appendChild(renderMetricCard("Path A", path_a));
-    els.resultsGrid.appendChild(renderMetricCard("Path B", path_b));
+    // Render Path A
+    if (base_paths.decision_a) {
+      els.resultsGrid.appendChild(
+        renderMetricCard(els.decisionA?.value || "Path A", base_paths.decision_a)
+      );
+    }
+    // Render Path B
+    if (base_paths.decision_b) {
+      els.resultsGrid.appendChild(
+        renderMetricCard(els.decisionB?.value || "Path B", base_paths.decision_b)
+      );
+    }
   };
 
-  const renderProbabilityBars = (data) => {
-    if (!els.probBars) return;
+  const renderProbabilityBars = (sim) => {
+    if (!els.probBars || !sim) return;
     clearElement(els.probBars);
-    // TODO: implement probability bars
+    
+    const { base_paths } = sim;
+    if (!base_paths) return;
+
+    const renderProbs = (pathData, pathLabel) => {
+      if (!pathData) return;
+      const { p5_income, p25_income, p50_income, p75_income, p95_income } = pathData;
+      const probs = [
+        { label: "P5", value: p5_income },
+        { label: "P25", value: p25_income },
+        { label: "P50 (Median)", value: p50_income },
+        { label: "P75", value: p75_income },
+        { label: "P95", value: p95_income },
+      ];
+
+      const wrapper = document.createElement("div");
+      wrapper.style.marginBottom = "12px";
+
+      const header = document.createElement("div");
+      header.style.fontSize = "11px";
+      header.style.color = "var(--text-muted)";
+      header.style.marginBottom = "6px";
+      header.style.fontWeight = "600";
+      header.textContent = pathLabel;
+      wrapper.appendChild(header);
+
+      probs.forEach(({ label, value }) => {
+        const row = document.createElement("div");
+        row.className = "prob-row";
+        row.style.display = "flex";
+        row.style.alignItems = "center";
+        row.style.gap = "var(--sp-md)";
+        row.style.marginBottom = "4px";
+
+        row.innerHTML = `
+          <div class="prob-key">${label}</div>
+          <div class="prob-bar-wrap" style="flex: 1; height: 4px; background: var(--bg-overlay); border-radius: 100px;">
+            <div style="height: 100%; background: ${pathLabel.includes('A') ? 'var(--path-a)' : 'var(--path-b)'}; border-radius: 100px; width: 100%;"></div>
+          </div>
+          <div class="prob-pct">${formatCurrencyINR(value)}</div>
+        `;
+        wrapper.appendChild(row);
+      });
+
+      els.probBars.appendChild(wrapper);
+    };
+
+    renderProbs(base_paths.decision_a, "Path A");
+    renderProbs(base_paths.decision_b, "Path B");
   };
 
-  const renderHistograms = (data) => {
-    if (!els.distributionGrid) return;
+  const renderHistograms = (sim) => {
+    if (!els.distributionGrid || !sim) return;
     clearElement(els.distributionGrid);
-    // TODO: implement histograms
+    const { base_paths } = sim;
+    if (!base_paths) return;
+
+    // Render histogram bars for both paths
+    const renderHistBars = (pathData, className) => {
+      if (!pathData) return;
+      const { histogram_counts, histogram_bins } = pathData;
+      if (!histogram_counts || histogram_counts.length === 0) return;
+
+      const maxCount = Math.max(...histogram_counts);
+      histogram_counts.forEach((count, idx) => {
+        const bar = document.createElement("div");
+        bar.className = `hist-bar ${className}`;
+        bar.style.height = `${(count / maxCount) * 100}%`;
+        bar.title = `Bin ${idx}: ${count} occurrences`;
+        els.distributionGrid.appendChild(bar);
+      });
+    };
+
+    renderHistBars(base_paths.decision_a, "bar-a");
+    renderHistBars(base_paths.decision_b, "bar-b");
   };
 
-  const renderScenarios = (data) => {
-    if (!els.scenarioGrid) return;
+  const renderScenarios = (sim) => {
+    if (!els.scenarioGrid || !sim) return;
     clearElement(els.scenarioGrid);
-    const { scenarios, path_a, path_b } = data || {};
+    const { scenarios } = sim;
     if (!Array.isArray(scenarios)) return;
 
-    scenarios.forEach((scenario) => {
-      const { name, income_a, income_b } = scenario;
+    scenarios.forEach((scenarioResult) => {
+      const { scenario, paths } = scenarioResult;
+      const income_a = paths.decision_a?.avg_final_income || 0;
+      const income_b = paths.decision_b?.avg_final_income || 0;
+
       const card = document.createElement("div");
       card.className = "scenario-card";
       card.innerHTML = `
-        <h4>${name}</h4>
-        <div>Path A: ${formatCurrencyINR(income_a)}</div>
-        <div>Path B: ${formatCurrencyINR(income_b)}</div>
+        <div class="scenario-label">${scenario}</div>
+        <div class="scenario-val">${formatCurrencyINR(income_a)}</div>
+        <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Path A</div>
+        <div class="scenario-val" style="color: var(--path-b); margin-top: 8px;">${formatCurrencyINR(income_b)}</div>
+        <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Path B</div>
       `;
       els.scenarioGrid.appendChild(card);
     });
   };
 
-  const renderRecommendation = (data) => {
-    if (!els.recommended) return;
-    const { recommended_path } = data || {};
-    if (recommended_path === "a" || recommended_path === "path_a") {
-      els.recommended.textContent = els.decisionA?.value || "Path A";
-    } else if (recommended_path === "b" || recommended_path === "path_b") {
-      els.recommended.textContent = els.decisionB?.value || "Path B";
+  const renderRecommendation = (sim) => {
+    if (!els.recommended || !sim) return;
+    const { recommended_path } = sim;
+    
+    if (recommended_path === "decision_a") {
+      els.recommended.textContent = `Based on the simulation, ${els.decisionA?.value || "Path A"} is recommended.`;
+    } else if (recommended_path === "decision_b") {
+      els.recommended.textContent = `Based on the simulation, ${els.decisionB?.value || "Path B"} is recommended.`;
     }
   };
 
-  const renderTrackBar = (data) => {
-    if (!els.trackFill) return;
-    const { path_a, path_b } = data || {};
-    if (!path_a || !path_b) return;
+  const renderTrackBar = (sim) => {
+    if (!els.trackFill || !sim) return;
+    const { base_paths } = sim;
+    if (!base_paths) return;
 
-    const incomeA = Number(path_a.avg_final_income || 0);
-    const incomeB = Number(path_b.avg_final_income || 0);
+    const incomeA = base_paths.decision_a?.avg_final_income || 0;
+    const incomeB = base_paths.decision_b?.avg_final_income || 0;
     const total = incomeA + incomeB || 1;
     const shareA = (incomeA / total) * 100;
 
@@ -414,14 +499,40 @@
     els.trackFill.style.width = "0%";
 
     setTimeout(() => {
-      els.trackFill.style.transition = "width 800ms ease-out";
+      els.trackFill.style.transition = "width 800ms cubic-bezier(0.4, 0, 0.2, 1)";
       els.trackFill.style.width = `${Math.max(5, Math.min(95, shareA))}%`;
     }, 50);
   };
 
   const renderNarrative = (data) => {
-    if (!els.narrativeText || !data.narrative) return;
-    els.narrativeText.textContent = data.narrative;
+    if (!els.narrativeText || !data) return;
+    els.narrativeText.textContent = data.narrative || "Narrative loading...";
+    
+    // Show comparison if available
+    if (data.comparison && els.comparisonBlock) {
+      showElement(els.comparisonBlock);
+      const compGrid = document.querySelector(".comparison-grid");
+      if (compGrid) {
+        clearElement(compGrid);
+        
+        const primaryCard = document.createElement("div");
+        primaryCard.className = "scenario-card";
+        primaryCard.innerHTML = `
+          <h4>${data.comparison.primary_model}</h4>
+          <p>${data.comparison.primary_text}</p>
+        `;
+        
+        const secondaryCard = document.createElement("div");
+        secondaryCard.className = "scenario-card";
+        secondaryCard.innerHTML = `
+          <h4>${data.comparison.secondary_model}</h4>
+          <p>${data.comparison.secondary_text}</p>
+        `;
+        
+        compGrid.appendChild(primaryCard);
+        compGrid.appendChild(secondaryCard);
+      }
+    }
   };
 
   // ===== EXPORT =====
