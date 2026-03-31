@@ -1,111 +1,232 @@
-# lifesim-montecarlo
+# LifeSim (Monte Carlo Life Decision Simulator)
 
-LifeSim – Monte Carlo Life Decision Simulator with AI Narratives (Hackathon project, 2026).
+LifeSim is a hackathon project (2026) that runs thousands of Monte Carlo simulations for two life paths and optionally turns the results into a friendly narrative using an LLM provider.
 
-A FastAPI + NumPy 2 backend runs thousands of Monte Carlo simulations for two life paths and returns full probability distributions, sensitivity analysis, and scenario stress tests. A multi-provider AI narrative system (NVIDIA NIM → Groq → Hugging Face → Together.ai) turns the numbers into a readable life story.
+- **Backend**: FastAPI + NumPy (in `backend/`)
+- **Frontend**: static web UI (in `frontend/`)
+- **LLM providers (optional)**: NVIDIA NIM → Groq → Hugging Face → Together.ai (automatic fallback)
 
----
-
-## Backend setup
-
-### Prerequisites
-
-- Python 3.10+
-- GitHub Codespaces or local Python environment
-- At least **one** of these API keys (optional but recommended for narratives):
-  - NVIDIA NIM API key (`NVIDIA_API_KEY`)
-  - Groq API key (`GROQ_API_KEY`)
-  - Hugging Face API token (`HF_TOKEN`)
-  - Together.ai API key (`TOGETHER_API_KEY`)
-
-The simulator itself is 100% local/offline; these keys are only for generating narratives.
+If you don’t configure any API keys, you still get full simulation results and a safe fallback narrative.
 
 ---
 
-## Install dependencies (with virtualenv)
+## Table of contents
 
-From the repo root:
+- [Quick start (recommended defaults)](#quick-start-recommended-defaults)
+- [Run in GitHub Codespaces](#run-in-github-codespaces)
+- [Run locally (Linux/macOS)](#run-locally-linuxmacos)
+- [Run locally (Windows)](#run-locally-windows)
+- [Run on a cloud VM (AWS / GCP / Azure)](#run-on-a-cloud-vm-aws--gcp--azure)
+- [Configure environment variables (.env)](#configure-environment-variables-env)
+- [Check the backend is working](#check-the-backend-is-working)
+- [Recommended simulation sizes (runs/years)](#recommended-simulation-sizes-runsyears)
+- [Avoiding “system uvicorn” problems](#avoiding-system-uvicorn-problems)
+- [Uninstalling uvicorn installed globally](#uninstalling-uvicorn-installed-globally)
+- [Changing the LLM provider or model](#changing-the-llm-provider-or-model)
+- [Getting API keys (4 providers)](#getting-api-keys-4-providers)
+- [Troubleshooting](#troubleshooting)
+
+---
+
+## Quick start (recommended defaults)
+
+From repo root:
 
 ```bash
 cd backend
-
-# 1) Create and activate virtual environment
-python -m venv venv
-# Windows: venv\Scripts\activate
-# macOS / Linux:
+python3 -m venv venv
 source venv/bin/activate
-
-# 2) Install Python dependencies
-pip install --upgrade pip
 pip install -r requirements.txt
+cp .env.example .env
+uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-To deactivate later:
+In a second terminal:
 
 ```bash
-deactivate
+cd frontend
+python3 -m http.server 8080
+```
+
+Open:
+- Backend docs: `http://127.0.0.1:8000/docs`
+- Frontend: `http://127.0.0.1:8080/index.html`
+
+---
+
+## Run in GitHub Codespaces
+
+1. GitHub → **Code** → **Codespaces** → Create.
+2. Start backend:
+
+```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+cp .env.example .env
+# (Optional) edit .env and add at least one key (NVIDIA_API_KEY / GROQ_API_KEY / HF_TOKEN / TOGETHER_API_KEY)
+
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+3. Start frontend:
+
+```bash
+cd frontend
+python3 -m http.server 8080
+```
+
+4. In Codespaces, use the forwarded ports:
+- `...-8000.app.github.dev/docs`
+- `...-8080.app.github.dev/index.html`
+
+---
+
+## Run locally (Linux/macOS)
+
+```bash
+git clone https://github.com/ahmedibu777/lifesim-montecarlo.git
+cd lifesim-montecarlo
+
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+cp .env.example .env
+# optional: edit backend/.env to add API keys
+
+uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Frontend:
+
+```bash
+cd frontend
+python3 -m http.server 8080
 ```
 
 ---
 
-## Configure environment (.env)
+## Run locally (Windows)
 
-In `backend/` there is a `.env.example` file. Copy it to `.env` and fill in what you have:
+PowerShell:
+
+```powershell
+git clone https://github.com/ahmedibu777/lifesim-montecarlo.git
+cd lifesim-montecarlo
+
+cd backend
+py -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+
+copy .env.example .env
+# optional: edit backend\.env to add API keys
+
+uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Frontend:
+
+```powershell
+cd frontend
+py -m http.server 8080
+```
+
+---
+
+## Run on a cloud VM (AWS / GCP / Azure)
+
+This is the same as local Linux, plus opening ports.
+
+### VM suggestions
+- Ubuntu 22.04+ recommended
+- 1–2 vCPU, 1–2GB RAM is enough
+
+### Open firewall / security group ports
+- `8000/tcp` backend
+- `8080/tcp` frontend (optional)
+
+### Install + run
+
+```bash
+sudo apt-get update
+sudo apt-get install -y git python3 python3-venv python3-pip
+
+git clone https://github.com/ahmedibu777/lifesim-montecarlo.git
+cd lifesim-montecarlo/backend
+
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+cp .env.example .env
+nano .env  # optional: add keys
+
+# bind publicly
+uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+Frontend:
+
+```bash
+cd ../frontend
+python3 -m http.server 8080 --bind 0.0.0.0
+```
+
+**Production note:** for real deployments, use a reverse proxy (nginx) + HTTPS + systemd.
+
+---
+
+## Configure environment variables (.env)
+
+Copy the example:
 
 ```bash
 cd backend
 cp .env.example .env
 ```
 
-Then open `.env` and set your keys and optional limits, for example:
+Keys (optional):
 
 ```env
-# NVIDIA NIM (primary)
-NVIDIA_API_KEY=your_nvidia_nim_key_here
+NVIDIA_API_KEY=...
+GROQ_API_KEY=...
+HF_TOKEN=...
+TOGETHER_API_KEY=...
+```
 
-# Groq fallback (optional)
-GROQ_API_KEY=your_groq_key_here
+Simulation defaults (optional):
 
-# Hugging Face fallback (optional)
-HF_TOKEN=your_hf_token_here
-
-# Together.ai fallback (optional)
-TOGETHER_API_KEY=your_together_key_here
-
-# Simulation defaults (optional)
+```env
 LIFESIM_DEFAULT_RUNS=2000
 LIFESIM_DEFAULT_YEARS=10
 LIFESIM_MAX_RUNS=10000
 LIFESIM_MAX_YEARS=40
 ```
 
-You only need **one** key for narratives; if all are missing, the API still returns full simulation data with a safe text fallback.
-
 ---
 
-## Run the backend server
+## Check the backend is working
 
-From repo root:
+### 1) Health check
 
 ```bash
-cd backend
-source venv/bin/activate      # or venv\Scripts\activate on Windows
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+curl http://127.0.0.1:8000/
 ```
 
-- API docs (Swagger): `http://localhost:8000/docs`
-- Health check: `http://localhost:8000/`
+Expected: JSON with `status: ok`.
 
-In GitHub Codespaces, use the forwarded 8000 port URL instead of `localhost`.
+### 2) Docs
+Open: `http://127.0.0.1:8000/docs`
 
----
-
-## Example API request (terminal, curl)
-
-Basic simulation with AI narrative enabled:
+### 3) Run a sample simulation
 
 ```bash
-curl -X POST "http://localhost:8000/simulate" \
+curl -X POST "http://127.0.0.1:8000/simulate" \
   -H "Content-Type: application/json" \
   -d '{
     "decision_a": "Stay at my current job",
@@ -117,120 +238,114 @@ curl -X POST "http://localhost:8000/simulate" \
   }'
 ```
 
-Typical response shape (shortened):
+If you don’t have any provider keys, the request still succeeds but returns a fallback narrative.
 
-```json
-{
-  "simulation": {
-    "base_paths": {
-      "decision_a": {
-        "avg_final_income": 58000.0,
-        "final_income_std": 12000.0,
-        "avg_satisfaction": 0.72,
-        "p5_income": 41000.0,
-        "p25_income": 52000.0,
-        "p50_income": 58000.0,
-        "p75_income": 64000.0,
-        "p95_income": 73000.0,
-        "min_income": 38000.0,
-        "max_income": 76000.0,
-        "histogram_bins": [...],
-        "histogram_counts": [...]
-      },
-      "decision_b": { "...": "..." }
-    },
-    "sensitivity": [ ... ],
-    "scenarios": [ ... ],
-    "recommended_path": "decision_b"
-  },
-  "narrative": "Multi-paragraph AI-generated story...",
-  "comparison": null
-}
-```
+---
 
-To disable narrative but keep all simulations:
+## Recommended simulation sizes (runs/years)
+
+- **Demo (fast):** `runs=500`, `years=10`
+- **Default (balanced):** `runs=2000`, `years=10`
+- **Heavy (slower):** `runs=10000`, `years=20`
+
+Notes:
+- `runs` increases CPU cost roughly linearly.
+- Very large `years` makes scenario/sensitivity computation heavier.
+
+---
+
+## Avoiding “system uvicorn” problems
+
+If you see errors like `ModuleNotFoundError: No module named fastapi`, you are probably running **system uvicorn** instead of the venv one.
+
+### Check which uvicorn/python you’re using
 
 ```bash
-curl -X POST "http://localhost:8000/simulate" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "decision_a": "Stay at my current job",
-    "decision_b": "Start a business",
-    "risk_tolerance": "medium",
-    "years": 10,
-    "runs": 2000,
-    "narrative_mode": "without_narrative"
-  }'
+which python3
+which uvicorn
 ```
 
-To compare two narrative styles (e.g. NVIDIA vs Groq):
+They should point to `backend/venv/bin/...`.
+
+### Safer way to start uvicorn
 
 ```bash
-curl -X POST "http://localhost:8000/simulate" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "decision_a": "Buy a house",
-    "decision_b": "Rent and invest",
-    "risk_tolerance": "medium",
-    "years": 20,
-    "runs": 3000,
-    "narrative_mode": "compare_models"
-  }'
+python3 -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 ---
 
-## Run the frontend (web UI)
+## Uninstalling uvicorn installed globally
 
-From repo root:
+If you previously installed uvicorn globally and want to remove it:
+
+### If you installed via pip (recommended removal)
 
 ```bash
-cd frontend
-python -m http.server 8080
+pip uninstall uvicorn
 ```
 
-Then open:
+### If it came from apt (Ubuntu/Debian)
 
-- `http://localhost:8080/index.html` (or the Codespaces forwarded 8080 URL)
+```bash
+sudo apt-get remove -y uvicorn
+```
 
-The frontend will:
-
-- Call `POST /simulate` on the backend using `fetch`.
-- Show:
-  - Average outcomes for Path A and Path B
-  - Risk profile + income bands (percentiles)
-  - Simple histograms for each path
-  - Scenario stress tests (Recession, Breakthrough, Health Crisis, Market Boom, Burnout)
-  - Sensitivity insights (available via CSV export)
-  - AI narrative (or comparison) if at least one API key is configured
-- Let you:
-  - Run demo presets (Startup vs Corporate, Grad vs Work, Buy vs Rent)
-  - Download results as CSV
-  - Copy a shareable URL with pre-filled parameters
+Then always run uvicorn from your venv (`backend/venv/bin/uvicorn`) or with `python3 -m uvicorn`.
 
 ---
 
-## One-click demo flow (for judges)
+## Changing the LLM provider or model
 
-1. **Start backend**  
-   ```bash
-   cd backend
-   source venv/bin/activate
-   uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-   ```
+### Where to change it
+Model defaults are in:
+- `backend/config.py` (`LLMConfig` fields)
 
-2. **Start frontend**  
-   ```bash
-   cd frontend
-   python -m http.server 8080
-   ```
+Provider call logic + fallback order is in:
+- `backend/narrative.py`
 
-3. Open `http://localhost:8080/index.html`  
-   - Select a preset like **Startup vs Corporate**.
-   - Click **RUN 10,000 SIMULATIONS**.
-   - Walk through:
-     - Base results for both paths
-     - Distribution & risk view
-     - Scenario stress tests
-     - AI narrative (or style comparison)
-     - CSV export / share link.
+### Change models using environment variables
+Add these to `backend/.env` (examples):
+
+```env
+# model overrides
+NVIDIA_MODEL=meta/llama-3.1-70b-instruct
+GROQ_MODEL=llama-3.3-70b-versatile
+HF_MODEL=nvidia/Nemotron-3-8B-Instruct
+TOGETHER_MODEL=meta-llama/Meta-Llama-3.1-70B-Instruct
+```
+
+### Force a specific provider
+Just set *one* provider key and leave the others empty.
+
+---
+
+## Getting API keys (4 providers)
+
+> Keep keys in `backend/.env` locally, or in Codespaces Secrets / Cloud Secret Manager in production.
+
+### 1) NVIDIA NIM (`NVIDIA_API_KEY`)
+- Create an NVIDIA developer account and generate an API key for NIM.
+
+### 2) Groq (`GROQ_API_KEY`)
+- Sign up on Groq and create an API key.
+
+### 3) Hugging Face (`HF_TOKEN`)
+- Hugging Face → Settings → Access Tokens → create a token.
+
+### 4) Together.ai (`TOGETHER_API_KEY`)
+- Together.ai dashboard → create an API key.
+
+---
+
+## Troubleshooting
+
+### Narrative keeps failing
+- Verify at least one key is set in `backend/.env`
+- Check the uvicorn logs for 401/403 (bad key), 429 (rate limit), or model not found
+
+### `python` command not found
+Use `python3` (Linux) or `py` (Windows).
+
+### Port already in use
+Change ports, e.g. `--port 8001`.
